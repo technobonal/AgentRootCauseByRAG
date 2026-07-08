@@ -1,0 +1,11 @@
+langchain
+langchain-community
+langchain-text-splitters
+langchain-groq
+langchain-cohere
+langchain-pinecone
+langchain-huggingface
+pypdf
+faiss-cpu
+streamlit
+sentence-transformers
