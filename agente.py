@@ -51,16 +51,11 @@ def responder(pregunta: str, contexto: str) -> str:
 if __name__ == "__main__":
     from tools import buscar_incidente
 
-    preguntas = [
-      
-        "¿Por qué se congela el rastreo los viernes?"
-    
-    ]
+    pregunta = "¿Por qué a los clientes se les cobra dos veces?"
+    contexto = buscar_incidente(pregunta)
+    respuesta = responder(pregunta, contexto)
 
-    for pregunta in preguntas:
-        contexto = buscar_incidente(pregunta)
-        respuesta = responder(pregunta, contexto)
-        print(f"\n{'='*60}")
-        print(f"❓ Pregunta: {pregunta}")
-        print(f"{'='*60}")
-        print(respuesta)
+    print(f"\n{'='*60}")
+    print(f"❓ Pregunta: {pregunta}")
+    print(f"{'='*60}")
+    print(respuesta)
