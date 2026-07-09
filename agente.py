@@ -3,6 +3,7 @@ from dotenv import load_dotenv
 from langchain_groq import ChatGroq
 from langchain_core.prompts import ChatPromptTemplate
 from tools import buscar_incidente
+import time
 
 load_dotenv()
 
@@ -12,7 +13,7 @@ llm = ChatGroq(
     model="openai/gpt-oss-120b",
     api_key=GROQ_API_KEY,
     temperature=0.2,
-    max_tokens=1024
+    max_tokens=600
 )
 
 prompt_template = ChatPromptTemplate.from_messages([
@@ -37,7 +38,12 @@ Contexto disponible:
 
 def responder(pregunta: str, contexto: str) -> str:
     mensaje = prompt_template.format_messages(pregunta=pregunta, contexto=contexto)
+    
+    inicio = time.time()
     respuesta = llm.invoke(mensaje)
+    duracion = time.time() - inicio
+    print(f"⏱️  Generación LLM (Groq): {duracion:.2f} segundos")
+    
     return respuesta.content
 
 
@@ -46,9 +52,9 @@ if __name__ == "__main__":
     from tools import buscar_incidente
 
     preguntas = [
-        "¿Por qué dos conductores reciben el mismo pedido?",
-        "¿Por qué se congela el rastreo los viernes?",
-        "¿Por qué a los clientes se les cobra dos veces?"
+      
+        "¿Por qué se congela el rastreo los viernes?"
+    
     ]
 
     for pregunta in preguntas:
