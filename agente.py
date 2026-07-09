@@ -2,8 +2,9 @@ import os
 from dotenv import load_dotenv
 from langchain_groq import ChatGroq
 from langchain_core.prompts import ChatPromptTemplate
+from langchain_core.output_parsers import StrOutputParser
+from langchain_core.runnables import RunnablePassthrough
 from tools import buscar_incidente
-import time
 
 load_dotenv()
 
@@ -13,7 +14,7 @@ llm = ChatGroq(
     model="openai/gpt-oss-120b",
     api_key=GROQ_API_KEY,
     temperature=0.2,
-    max_tokens=600
+    max_tokens=800
 )
 
 prompt_template = ChatPromptTemplate.from_messages([
@@ -36,26 +37,33 @@ Contexto disponible:
     ("human", "{pregunta}")
 ])
 
-def responder(pregunta: str, contexto: str) -> str:
-    mensaje = prompt_template.format_messages(pregunta=pregunta, contexto=contexto)
-    
+# 🔗 Cadena LCEL: toma la pregunta, busca contexto, arma el prompt, genera y parsea
+rag_chain = (
+    {"contexto": lambda x: buscar_incidente(x["pregunta"]), "pregunta": lambda x: x["pregunta"]}
+    | prompt_template
+    | llm
+    | StrOutputParser()
+)
+
+import time
+
+def responder(pregunta: str) -> str:
     inicio = time.time()
-    respuesta = llm.invoke(mensaje)
+    resultado = rag_chain.invoke({"pregunta": pregunta})
     duracion = time.time() - inicio
-    print(f"⏱️  Generación LLM (Groq): {duracion:.2f} segundos")
-    
-    return respuesta.content
+    print(f"⏱️  Tiempo total de la cadena (búsqueda + LLM): {duracion:.2f} segundos")
+    return resultado
 
 
-# 👇 Reemplazá todo el bloque anterior por este
 if __name__ == "__main__":
-    from tools import buscar_incidente
+    preguntas = [
+        "¿Por qué a los clientes se les cobra dos veces?"
+        
+    ]
 
-    pregunta = "¿Por qué a los clientes se les cobra dos veces?"
-    contexto = buscar_incidente(pregunta)
-    respuesta = responder(pregunta, contexto)
-
-    print(f"\n{'='*60}")
-    print(f"❓ Pregunta: {pregunta}")
-    print(f"{'='*60}")
-    print(respuesta)
+    for pregunta in preguntas:
+        respuesta = responder(pregunta)
+        print(f"\n{'='*60}")
+        print(f"❓ Pregunta: {pregunta}")
+        print(f"{'='*60}")
+        print(respuesta)
