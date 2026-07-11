@@ -18,12 +18,12 @@ El agente identifica el incidente correspondiente, explica su **causa raíz téc
 El flujo del sistema sigue un patrón **RAG (Retrieval-Augmented Generation)**:
 
 ```
-┌───────────────────┐     ┌───────────────────┐     ┌─────────────── ────┐
-│  PDF Incidentes   │     │  PDF Causa Raíz   │     │  Usuario (input)   │
-└─────────┬─────────┘     └────────┬──────────┘     └─────────┬──────────┘
-          │                          │                          │
-          └────────────┬─────────────┘                          │
-                        ▼                                       │
+┌───────────────────┐     ┌───────────────────┐       ┌─────────────── ────┐
+│  PDF Incidentes   │     │  PDF Causa Raíz   │       │  Usuario (input)   │
+└─────────┬─────────┘     └────────┬──────────┘       └─────────┬──────────┘
+          │                        │                            │
+          └────────────┬───────────┘                            │
+                       ▼                                        │
               ┌────────────────────┐                            │
               │  Carga y chunking  │                            │
               │      (rag.py)      │                            │
