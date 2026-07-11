@@ -179,8 +179,8 @@ git push -u origin master
 git log --oneline
 
 # Configurar identidad del autor de los commits
-git config user.name "technobonal"
-git config user.email "technobonal@gmail.com"
+git config user.name 
+git config user.email 
 ```
 
 ## Historial de commits
