@@ -18,47 +18,47 @@ El agente identifica el incidente correspondiente, explica su **causa raíz téc
 El flujo del sistema sigue un patrón **RAG (Retrieval-Augmented Generation)**:
 
 ```
-┌───────────────────┐     ┌───────────────────┐     ┌───────────────────┐
-│  PDF Incidentes     │     │  PDF Causa Raíz     │     │  Usuario (input)    │
-└─────────┬──────────┘     └─────────┬──────────┘     └─────────┬──────────┘
-          │                          │                          │
-          └────────────┬─────────────┘                          │
-                        ▼                                       │
+┌───────────────────┐     ┌───────────────────┐       ┌─────────────── ────┐
+│  PDF Incidentes   │     │  PDF Causa Raíz   │       │  Usuario (input)   │
+└─────────┬─────────┘     └────────┬──────────┘       └─────────┬──────────┘
+          │                        │                            │
+          └────────────┬───────────┘                            │
+                       ▼                                        │
               ┌────────────────────┐                            │
-              │  Carga y chunking    │                          │
-              │      (rag.py)        │                          │
-              └──────────┬──────────┘                           │
+              │  Carga y chunking  │                            │
+              │      (rag.py)      │                            │
+              └──────────┬─────────┘                            
                          ▼                                      │
               ┌────────────────────┐                            │
-              │  Embeddings Cohere   │                          │
-              └──────────┬──────────┘                           │
+              │  Embeddings Cohere │                            │
+              └──────────┬─────────┘                            │
                          ▼                                      │
-              ┌────────────────────┐                            │
-              │  Índice Pinecone     │◄────────────────────────┘
-              │   (vector store)     │      (busca contexto relevante)
+              ┌───────────────── ───┐                           │
+              │  Índice Pinecone    │◄───────────  ─────────────┘
+              │   (vector store)    │      (busca contexto relevante)
               └──────────┬──────────┘
                          ▼
               ┌────────────────────┐
-              │  Retriever (k=4)      │
-              │     (tools.py)        │
-              └──────────┬──────────┘
+              │  Retriever (k=4)   │
+              │     (tools.py)     │
+              └──────────┬─────────┘
                          ▼
               ┌────────────────────┐
-              │  Prompt Template      │
-              │  + LLM Groq (LCEL)     │
-              │     (agente.py)        │
-              └──────────┬──────────┘
+              │  Prompt Template   │
+              │  + LLM Groq (LCEL) │
+              │     (agente.py)    │
+              └──────────┬─────────┘
                          ▼
               ┌────────────────────┐
-              │  Respuesta final:      │
-              │  Incidente +            │
-              │  Causa Raíz +           │
-              │  Solución                │
-              └──────────┬──────────┘
+              │  Respuesta final:  │
+              │  Incidente +       │
+              │  Causa Raíz +      │
+              │  Solución          │
+              └──────────┬─────────┘
                          ▼
               ┌────────────────────┐
-              │  Interfaz Streamlit    │
-              │      (app.py)           │
+              │ Interfaz Streamlit │
+              │      (app.py)      │
               └────────────────────┘
 ```
 
@@ -179,8 +179,8 @@ git push -u origin master
 git log --oneline
 
 # Configurar identidad del autor de los commits
-git config user.name "technobonal"
-git config user.email "technobonal@gmail.com"
+git config user.name 
+git config user.email 
 ```
 
 ## Historial de commits
@@ -206,7 +206,34 @@ La aplicación se encuentra desplegada y disponible públicamente en:
 👉 [agentrootcausebyfranklinbonalde-5zkiunymzjan4qxk5nmwsc.streamlit.app](https://agentrootcausebyfranklinbonalde-5zkiunymzjan4qxk5nmwsc.streamlit.app/)
 
 ### Oracle Cloud Infrastructure (OCI)
-*(Sección pendiente — se agregarán capturas e instrucciones del despliegue en OCI con Nginx, Certbot y DuckDNS)*
+## 🚀 Despliegue en Oracle Cloud Infrastructure (OCI)
+
+Además del despliegue en Streamlit Community Cloud, este proyecto está desplegado en una instancia propia de OCI, con Nginx como reverse proxy y HTTPS habilitado.
+
+### Arquitectura del despliegue
+- **Instancia:** VM.Standard.E3.Flex — Oracle Linux 9.7
+- **Región:** sa-saopaulo-1
+- **Reverse proxy:** Nginx con certificado SSL autofirmado
+- **Backend:** Streamlit en el puerto 8501, expuesto vía proxy en el 443
+- **Seguridad:** SELinux (`httpd_can_network_connect`) + firewall del SO + Security List de OCI
+
+### Vista de la aplicación
+
+![Pantalla inicial de LogisCore Root Cause Agent](screenshots/app-home-empty.png)
+
+### Acceso vía HTTPS con Nginx
+
+El tráfico se sirve a través de Nginx con certificado SSL autofirmado en el puerto 443:
+
+![Acceso HTTPS a través del reverse proxy](screenshots/https-nginx-proxy.png)
+
+> ⚠️ El certificado es autofirmado, por lo que el navegador muestra una advertencia de conexión no segura. Es el comportamiento esperado en este entorno.
+
+### Ejemplo de análisis de causa raíz
+
+![Ejemplo de consulta y respuesta del agente](screenshots/http-8501-direct.png)
+
+El agente identifica la causa raíz — en este caso, una condición de carrera por falta de control de concurrencia — y propone una solución concreta, como el uso de una columna de bloqueo optimista (`v_lock`).
 
 ## Autor
 
