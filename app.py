@@ -37,7 +37,7 @@ ETIQUETAS_TIPO = {"incidente": "Incidente", "causa_raiz": "Causa raíz"}
 # ---------------------------------------------------------------------------
 CSS = """
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
 :root {
     --bg-top: #2B1B36;
     --bg-mid: #3D2450;
@@ -48,7 +48,9 @@ CSS = """
     --glass: rgba(255, 255, 255, 0.08);
     --glass-strong: rgba(255, 255, 255, 0.12);
     --glass-border: rgba(255, 255, 255, 0.17);
+    --chip-border: rgba(255, 255, 255, 0.32);
     --coral: #FF8A65;
+    --coral-soft: #FFB199;
     --pink: #F472B6;
     --violet: #C04BD6;
     --ok: #6EE7B7;
@@ -73,6 +75,13 @@ html, body, [class*="css"], .stApp {
 header[data-testid="stHeader"] { background: transparent; }
 div[data-testid="stAppDeployButton"], .stAppDeployButton { display: none; }
 .block-container { padding-top: 2rem; max-width: 840px; }
+/* ---------- Foco visible para teclado (accesibilidad) ---------- */
+button:focus-visible,
+summary:focus-visible,
+a:focus-visible {
+    outline: 2px solid var(--coral-soft) !important;
+    outline-offset: 2px !important;
+}
 /* ---------- Hero ---------- */
 .hero { text-align: center; margin: 0.25rem 0 0.6rem 0; }
 .hero-eyebrow {
@@ -117,6 +126,17 @@ div[data-testid="stAppDeployButton"], .stAppDeployButton { display: none; }
     -webkit-mask-image: radial-gradient(closest-side, #000 55%, transparent 100%);
     mask-image: radial-gradient(closest-side, #000 55%, transparent 100%);
 }
+/* Hero compacto: se usa después de la primera consulta para subir el resultado */
+.hero-compact {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 6px 16px;
+    margin: 0 0 14px 0;
+}
+.hero-compact .hero-eyebrow { margin: 0; font-size: 11px; padding: 4px 11px; }
+.hero-compact .hero-title { font-size: 28px; margin: 0; }
 /* ---------- Buscador (el st.form es la barra completa) ---------- */
 div[data-testid="stForm"] {
     border: 1.5px solid transparent !important;
@@ -126,6 +146,14 @@ div[data-testid="stForm"] {
         linear-gradient(rgba(34, 20, 45, 0.88), rgba(34, 20, 45, 0.88)) padding-box,
         linear-gradient(90deg, var(--coral), var(--violet)) border-box;
     box-shadow: 0 12px 40px rgba(0, 0, 0, 0.28), 0 0 0 5px rgba(192, 75, 214, 0.08);
+    transition: box-shadow 0.15s ease;
+}
+/* Foco visible: como el input no muestra su propio borde, el halo lo da toda la barra */
+div[data-testid="stForm"]:focus-within {
+    box-shadow:
+        0 12px 40px rgba(0, 0, 0, 0.28),
+        0 0 0 3px rgba(255, 177, 153, 0.70),
+        0 0 0 8px rgba(192, 75, 214, 0.22);
 }
 div[data-testid="stTextInput"] div[data-baseweb="input"],
 div[data-testid="stTextInput"] div[data-baseweb="base-input"],
@@ -149,21 +177,27 @@ div[data-testid="stTextInput"] input {
 }
 div[data-testid="stTextInput"] input::placeholder { color: var(--text-mute) !important; opacity: 1; }
 div[data-testid="InputInstructions"] { display: none; }
+/* Botón principal: texto oscuro sobre el degradado coral-rosa (contraste alto) */
 div[data-testid="stFormSubmitButton"] button {
     border: none;
     border-radius: 12px;
     padding: 0.65rem 0.8rem;
-    font-weight: 600;
+    font-weight: 700;
     font-size: 15px;
-    color: #FFFFFF;
+    color: var(--bg-top) !important;
     background: linear-gradient(90deg, var(--coral), var(--pink));
     box-shadow: 0 6px 18px rgba(244, 114, 182, 0.30);
     transition: transform 0.12s ease, box-shadow 0.12s ease;
 }
+div[data-testid="stFormSubmitButton"] button p,
+div[data-testid="stFormSubmitButton"] button div {
+    color: var(--bg-top) !important;
+    font-weight: 700;
+}
 div[data-testid="stFormSubmitButton"] button:hover {
     transform: translateY(-1px);
     box-shadow: 0 10px 26px rgba(244, 114, 182, 0.42);
-    color: #FFFFFF;
+    color: var(--bg-top) !important;
     border: none;
 }
 div[data-testid="stFormSubmitButton"] button:active { transform: translateY(0); }
@@ -171,9 +205,9 @@ div[data-testid="stFormSubmitButton"] button:active { transform: translateY(0); 
 div[data-testid="stButton"] button,
 div[data-testid="stDownloadButton"] button {
     border-radius: 999px;
-    border: 1px solid var(--glass-border);
-    background: var(--glass);
-    color: var(--text-soft);
+    border: 1px solid var(--chip-border);
+    background: var(--glass-strong);
+    color: var(--text);
     font-size: 13.5px;
     padding: 0.4rem 0.9rem;
     backdrop-filter: blur(8px);
@@ -183,7 +217,7 @@ div[data-testid="stButton"] button:hover,
 div[data-testid="stDownloadButton"] button:hover {
     border-color: var(--coral);
     color: #FFFFFF;
-    background: var(--glass-strong);
+    background: rgba(255, 138, 101, 0.18);
 }
 .chips-label { font-size: 13px; color: var(--text-mute); text-align: center; margin: 16px 0 6px 0; }
 .hint { font-size: 13px; color: var(--text-mute); text-align: center; margin: 14px 0 0 0; }
@@ -202,13 +236,12 @@ div[data-testid="stVerticalBlockBorderWrapper"]:has(.card-accent),
     background: linear-gradient(135deg, rgba(255, 138, 101, 0.16), rgba(244, 114, 182, 0.09)) !important;
     box-shadow: 0 10px 34px rgba(244, 114, 182, 0.22) !important;
 }
-.st-key-card_causa p, .st-key-card_causa li,
 .st-key-card_solucion p, .st-key-card_solucion li {
     font-size: 16px;
     line-height: 1.65;
     max-width: 78ch;
 }
-.st-key-card_causa strong, .st-key-card_solucion strong { color: #FFFFFF; }
+.st-key-card_solucion strong { color: #FFFFFF; }
 .field-label {
     font-family: 'JetBrains Mono', monospace;
     font-size: 11px;
@@ -217,23 +250,28 @@ div[data-testid="stVerticalBlockBorderWrapper"]:has(.card-accent),
     color: var(--coral);
     margin: 12px 0 2px 0;
 }
+/* Jerarquía dentro de la tarjeta de causa raíz: la causa manda, el síntoma da contexto */
+.txt-sintoma {
+    font-size: 14.5px;
+    line-height: 1.6;
+    color: var(--text-soft);
+    max-width: 78ch;
+}
+.txt-causa {
+    font-size: 18.5px;
+    font-weight: 500;
+    line-height: 1.55;
+    color: #FFFFFF;
+    max-width: 70ch;
+}
+.txt-sintoma strong, .txt-causa strong { color: #FFFFFF; font-weight: 700; }
+.txt-causa strong { color: var(--coral-soft); }
 .result-head { display: flex; align-items: center; gap: 10px; margin: 30px 0 12px 0; }
 .result-title {
     font-family: 'Fraunces', serif;
     font-weight: 600;
     font-size: 28px;
     color: var(--text);
-}
-.pill {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 11px;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: var(--coral);
-    background: rgba(255, 138, 101, 0.12);
-    border: 1px solid rgba(255, 138, 101, 0.35);
-    border-radius: 999px;
-    padding: 3px 10px;
 }
 .card-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 6px; }
 .card-title { font-family: 'Fraunces', serif; font-weight: 600; font-size: 22px; color: var(--text); }
@@ -358,6 +396,8 @@ section[data-testid="stFileUploaderDropzone"] button {
 /* ---------- Mobile ---------- */
 @media (max-width: 640px) {
     .hero-title { font-size: 36px; }
+    .hero-compact .hero-title { font-size: 24px; }
+    .txt-causa { font-size: 17px; }
 }
 </style>
 """
@@ -400,6 +440,39 @@ def nueva_consulta():
     """Callback de 'Nueva consulta': limpia el buscador y el resultado anterior."""
     st.session_state["pregunta_input"] = ""
     st.session_state.pop("ultimo", None)
+
+
+def html_hero(compacto: bool) -> str:
+    """Hero completo (con ilustración) o compacto (una línea) para subir el resultado."""
+    if compacto:
+        return (
+            '<div class="hero hero-compact">'
+            '<div class="hero-eyebrow"><b>⚙</b> LogisCore :: Root Cause Agent</div>'
+            '<div class="hero-title">Del síntoma a la <em>causa raíz</em></div>'
+            "</div>"
+        )
+
+    hero = (
+        '<div class="hero">'
+        '<div class="hero-eyebrow"><b>⚙</b> LogisCore :: Root Cause Agent</div>'
+        '<div class="hero-title">Del síntoma a la <em>causa raíz</em></div>'
+        '<div class="hero-sub">Preguntá sobre cualquier incidente y te ayudo a encontrar la causa raíz y la solución.</div>'
+        "</div>"
+    )
+    img_base64 = cargar_imagen_base64(RUTA_IMAGEN)
+    if img_base64:
+        hero += (
+            f'<div class="hero-img"><img src="data:image/jpeg;base64,{img_base64}" '
+            'alt="Diagrama de causa raíz"></div>'
+        )
+    return hero
+
+
+def texto_a_html(texto: str) -> str:
+    """Escapa el texto del modelo y respeta la **negrita** markdown (único formato que se le pide)."""
+    seguro = html.escape(texto.strip())
+    seguro = re.sub(r"\*\*(.+?)\*\*", r"<strong>\1</strong>", seguro, flags=re.DOTALL)
+    return seguro.replace("\n", "<br>")
 
 
 def fuentes_usadas(evidencias: list) -> list:
@@ -480,8 +553,7 @@ def mostrar_resultado(resultado: dict, origen: str, pregunta: str):
     evidencias = resultado["evidencias"]
 
     st.markdown(
-        '<div class="result-head"><span class="result-title">Análisis</span>'
-        '<span class="pill">Causa raíz · Solución</span></div>',
+        '<div class="result-head"><span class="result-title">Análisis</span></div>',
         unsafe_allow_html=True,
     )
 
@@ -504,9 +576,15 @@ def mostrar_resultado(resultado: dict, origen: str, pregunta: str):
             )
             if analisis.incidente:
                 st.markdown('<div class="field-label">Síntoma</div>', unsafe_allow_html=True)
-                st.markdown(analisis.incidente)
+                st.markdown(
+                    f'<div class="txt-sintoma">{texto_a_html(analisis.incidente)}</div>',
+                    unsafe_allow_html=True,
+                )
             st.markdown('<div class="field-label">Causa</div>', unsafe_allow_html=True)
-            st.markdown(analisis.causa_raiz)
+            st.markdown(
+                f'<div class="txt-causa">{texto_a_html(analisis.causa_raiz)}</div>',
+                unsafe_allow_html=True,
+            )
             fuentes_html = html_fuentes(evidencias)
             if fuentes_html:
                 st.markdown(fuentes_html, unsafe_allow_html=True)
@@ -583,23 +661,10 @@ elif usa_pdfs_propios:
     st.sidebar.success("Usando tus PDFs como contexto.")
 
 # ---------------------------------------------------------------------------
-# Hero
+# Hero (se reserva el lugar acá y se rellena más abajo, cuando ya se sabe si
+# hay una consulta en curso o un resultado: en ese caso se muestra compacto)
 # ---------------------------------------------------------------------------
-st.markdown(
-    """<div class="hero">
-<div class="hero-eyebrow"><b>⚙</b> LogisCore :: Root Cause Agent</div>
-<div class="hero-title">Del síntoma a la <em>causa raíz</em></div>
-<div class="hero-sub">Preguntá sobre cualquier incidente y te ayudo a encontrar la causa raíz y la solución.</div>
-</div>""",
-    unsafe_allow_html=True,
-)
-
-img_base64 = cargar_imagen_base64(RUTA_IMAGEN)
-if img_base64:
-    st.markdown(
-        f'<div class="hero-img"><img src="data:image/jpeg;base64,{img_base64}" alt="Diagrama de causa raíz"></div>',
-        unsafe_allow_html=True,
-    )
+hero_slot = st.empty()
 
 # ---------------------------------------------------------------------------
 # Buscador (st.form: Enter también envía la consulta)
@@ -633,6 +698,11 @@ st.markdown(
 # ---------------------------------------------------------------------------
 lanzar = enviado or st.session_state.pop("lanzar", False)
 pregunta = st.session_state.get("pregunta_input", "").strip()
+
+# Hero compacto si ya hay un resultado guardado o si esta pasada lanza una búsqueda válida;
+# con "Nueva consulta" vuelve el hero completo.
+hero_compacto = bool(st.session_state.get("ultimo")) or (lanzar and bool(pregunta))
+hero_slot.markdown(html_hero(hero_compacto), unsafe_allow_html=True)
 
 if lanzar:
     if not pregunta:
