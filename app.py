@@ -13,7 +13,7 @@ from agente import responder_estructurado, responder_desde_texto
 # Configuración
 # ---------------------------------------------------------------------------
 st.set_page_config(
-    page_title="LogisCore RCA Agent",
+    page_title="LogisCore Root Cause Agent",
     page_icon="🔧",
     layout="centered",
     initial_sidebar_state="expanded",
@@ -455,7 +455,7 @@ elif usa_pdfs_propios:
 # ---------------------------------------------------------------------------
 st.markdown(
     """<div class="hero">
-<div class="hero-eyebrow"><b>⚙</b> LogisCore :: RCA Agent</div>
+<div class="hero-eyebrow"><b>⚙</b> LogisCore :: Root Cause Agent</div>
 <div class="hero-title">Del síntoma a la <em>causa raíz</em></div>
 <div class="hero-sub">Preguntá sobre cualquier incidente y te ayudo a encontrar la causa raíz y la solución.</div>
 </div>""",
