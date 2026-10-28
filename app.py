@@ -71,6 +71,7 @@ html, body, [class*="css"], .stApp {
     background-attachment: fixed;
 }
 header[data-testid="stHeader"] { background: transparent; }
+div[data-testid="stAppDeployButton"], .stAppDeployButton { display: none; }
 .block-container { padding-top: 2.5rem; max-width: 840px; }
 /* ---------- Hero ---------- */
 .hero { text-align: center; margin: 0.5rem 0 1.2rem 0; }
@@ -105,13 +106,13 @@ header[data-testid="stHeader"] { background: transparent; }
     background-clip: text;
     color: transparent;
 }
-.hero-sub { font-size: 17px; color: var(--text-soft); margin: 0 auto; max-width: 560px; }
+.hero-sub { font-size: 17px; color: var(--text-soft); margin: 0 auto; max-width: 520px; text-wrap: balance; }
 .hero-img { text-align: center; margin: 4px 0 8px 0; }
 .hero-img img {
-    width: 240px;
+    width: 260px;
     mix-blend-mode: screen;
-    opacity: 0.6;
-    filter: grayscale(100%);
+    opacity: 0.9;
+    filter: grayscale(100%) brightness(1.3) contrast(1.1);
     -webkit-mask-image: radial-gradient(closest-side, #000 55%, transparent 100%);
     mask-image: radial-gradient(closest-side, #000 55%, transparent 100%);
 }
@@ -126,10 +127,18 @@ div[data-testid="stForm"] {
     box-shadow: 0 12px 40px rgba(0, 0, 0, 0.28), 0 0 0 5px rgba(192, 75, 214, 0.08);
 }
 div[data-testid="stTextInput"] div[data-baseweb="input"],
-div[data-testid="stTextInput"] div[data-baseweb="base-input"] {
+div[data-testid="stTextInput"] div[data-baseweb="base-input"],
+div[data-testid="stTextInputRootElement"],
+div[data-testid="stTextInputRootElement"] > div {
     background: transparent !important;
     border: none !important;
     box-shadow: none !important;
+}
+div[data-testid="stTextInputRootElement"]:focus-within,
+div[data-testid="stTextInput"] div[data-baseweb="input"]:focus-within {
+    border: none !important;
+    box-shadow: none !important;
+    outline: none !important;
 }
 div[data-testid="stTextInput"] input {
     font-size: 18px !important;
@@ -182,10 +191,11 @@ div[data-testid="stVerticalBlockBorderWrapper"] {
     backdrop-filter: blur(14px);
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.22);
 }
-div[data-testid="stVerticalBlockBorderWrapper"]:has(.card-accent) {
-    border: 1.5px solid rgba(255, 138, 101, 0.55);
-    background: linear-gradient(135deg, rgba(255, 138, 101, 0.14), rgba(244, 114, 182, 0.08));
-    box-shadow: 0 10px 34px rgba(244, 114, 182, 0.20);
+div[data-testid="stVerticalBlockBorderWrapper"]:has(.card-accent),
+.st-key-card_causa {
+    border: 1.5px solid rgba(255, 138, 101, 0.60) !important;
+    background: linear-gradient(135deg, rgba(255, 138, 101, 0.16), rgba(244, 114, 182, 0.09)) !important;
+    box-shadow: 0 10px 34px rgba(244, 114, 182, 0.22) !important;
 }
 .result-head { display: flex; align-items: center; gap: 10px; margin: 30px 0 12px 0; }
 .result-title {
@@ -207,6 +217,17 @@ div[data-testid="stVerticalBlockBorderWrapper"]:has(.card-accent) {
 }
 .card-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 6px; }
 .card-title { font-family: 'Fraunces', serif; font-weight: 600; font-size: 22px; color: var(--text); }
+.card-title::before {
+    content: "";
+    display: inline-block;
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    margin-right: 10px;
+    vertical-align: middle;
+}
+.t-causa::before { background: var(--coral); box-shadow: 0 0 10px rgba(255, 138, 101, 0.7); }
+.t-solucion::before { background: var(--violet); box-shadow: 0 0 10px rgba(192, 75, 214, 0.7); }
 .badge {
     font-family: 'JetBrains Mono', monospace;
     font-size: 11px;
@@ -375,10 +396,10 @@ def mostrar_resultado(resultado: dict, origen: str):
             unsafe_allow_html=True,
         )
     else:
-        with st.container(border=True):
+        with st.container(border=True, key="card_causa"):
             st.markdown('<div class="card-accent"></div>', unsafe_allow_html=True)
             st.markdown(
-                '<div class="card-head"><span class="card-title">Causa raíz</span>'
+                '<div class="card-head"><span class="card-title t-causa">Causa raíz</span>'
                 f'<span class="badge badge-{analisis.confianza}">Confianza {analisis.confianza}</span></div>',
                 unsafe_allow_html=True,
             )
@@ -386,8 +407,8 @@ def mostrar_resultado(resultado: dict, origen: str):
                 st.markdown(f"**Incidente:** {analisis.incidente}")
             st.markdown(analisis.causa_raiz)
 
-        with st.container(border=True):
-            st.markdown('<div class="card-head"><span class="card-title">Solución</span></div>', unsafe_allow_html=True)
+        with st.container(border=True, key="card_solucion"):
+            st.markdown('<div class="card-head"><span class="card-title t-solucion">Solución</span></div>', unsafe_allow_html=True)
             if analisis.solucion:
                 st.markdown(analisis.solucion)
             else:
