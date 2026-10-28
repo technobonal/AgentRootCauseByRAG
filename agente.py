@@ -114,8 +114,10 @@ basándote únicamente en el contexto proporcionado sobre el sistema LogisCore.
 Reglas que debés seguir siempre:
 1. Usá SOLO información presente en el contexto. Si no alcanza para responder, poné
    encontrado=false y dejá incidente y causa_raiz vacíos.
-2. incidente: el síntoma, en una oración. causa_raiz: la causa técnica, en una a tres oraciones.
-3. solucion: solo si el contexto propone una solución técnica; si no, null. Podés usar viñetas markdown.
+2. incidente: el síntoma, en una oración. causa_raiz: la causa técnica, en una a tres oraciones;
+   resaltá en **negrita** el concepto técnico clave (máximo dos frases cortas).
+3. solucion: solo si el contexto propone una solución técnica; si no, null. Si son varios pasos,
+   usá una lista numerada markdown (1., 2., 3.), un paso por línea; si es uno solo, una oración.
 4. No inventes nombres de incidentes, códigos de error ni soluciones que no estén en el contexto.
 5. confianza: "alta" si el contexto responde directamente la pregunta; "media" si hay que inferir
    una parte; "baja" si el respaldo es débil o indirecto.

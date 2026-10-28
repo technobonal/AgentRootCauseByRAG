@@ -43,8 +43,8 @@ CSS = """
     --bg-mid: #3D2450;
     --bg-bottom: #4A2D5C;
     --text: #F6EEF9;
-    --text-soft: #CDBBD6;
-    --text-mute: #A992B5;
+    --text-soft: #DCCDE4;
+    --text-mute: #BDA8C8;
     --glass: rgba(255, 255, 255, 0.08);
     --glass-strong: rgba(255, 255, 255, 0.12);
     --glass-border: rgba(255, 255, 255, 0.17);
@@ -72,9 +72,9 @@ html, body, [class*="css"], .stApp {
 }
 header[data-testid="stHeader"] { background: transparent; }
 div[data-testid="stAppDeployButton"], .stAppDeployButton { display: none; }
-.block-container { padding-top: 2.5rem; max-width: 840px; }
+.block-container { padding-top: 2rem; max-width: 840px; }
 /* ---------- Hero ---------- */
-.hero { text-align: center; margin: 0.5rem 0 1.2rem 0; }
+.hero { text-align: center; margin: 0.25rem 0 0.6rem 0; }
 .hero-eyebrow {
     display: inline-block;
     font-family: 'JetBrains Mono', monospace;
@@ -86,7 +86,7 @@ div[data-testid="stAppDeployButton"], .stAppDeployButton { display: none; }
     border: 1px solid var(--glass-border);
     border-radius: 999px;
     padding: 5px 14px;
-    margin-bottom: 18px;
+    margin-bottom: 16px;
     backdrop-filter: blur(8px);
 }
 .hero-eyebrow b { color: var(--coral); font-weight: 500; }
@@ -97,7 +97,8 @@ div[data-testid="stAppDeployButton"], .stAppDeployButton { display: none; }
     line-height: 1.08;
     letter-spacing: -0.02em;
     color: var(--text);
-    margin: 0 0 12px 0;
+    margin: 0 0 10px 0;
+    text-wrap: balance;
 }
 .hero-title em {
     font-style: normal;
@@ -107,9 +108,9 @@ div[data-testid="stAppDeployButton"], .stAppDeployButton { display: none; }
     color: transparent;
 }
 .hero-sub { font-size: 17px; color: var(--text-soft); margin: 0 auto; max-width: 520px; text-wrap: balance; }
-.hero-img { text-align: center; margin: 4px 0 8px 0; }
+.hero-img { text-align: center; margin: 0 0 6px 0; }
 .hero-img img {
-    width: 260px;
+    width: 170px;
     mix-blend-mode: screen;
     opacity: 0.9;
     filter: grayscale(100%) brightness(1.3) contrast(1.1);
@@ -166,8 +167,9 @@ div[data-testid="stFormSubmitButton"] button:hover {
     border: none;
 }
 div[data-testid="stFormSubmitButton"] button:active { transform: translateY(0); }
-/* ---------- Chips de ejemplo ---------- */
-div[data-testid="stButton"] button {
+/* ---------- Chips de ejemplo y botones secundarios ---------- */
+div[data-testid="stButton"] button,
+div[data-testid="stDownloadButton"] button {
     border-radius: 999px;
     border: 1px solid var(--glass-border);
     background: var(--glass);
@@ -177,12 +179,15 @@ div[data-testid="stButton"] button {
     backdrop-filter: blur(8px);
     transition: border-color 0.12s ease, color 0.12s ease, background 0.12s ease;
 }
-div[data-testid="stButton"] button:hover {
+div[data-testid="stButton"] button:hover,
+div[data-testid="stDownloadButton"] button:hover {
     border-color: var(--coral);
     color: #FFFFFF;
     background: var(--glass-strong);
 }
-.chips-label { font-size: 12.5px; color: var(--text-mute); text-align: center; margin: 16px 0 6px 0; }
+.chips-label { font-size: 13px; color: var(--text-mute); text-align: center; margin: 16px 0 6px 0; }
+.hint { font-size: 13px; color: var(--text-mute); text-align: center; margin: 14px 0 0 0; }
+.hint b { color: var(--text-soft); font-weight: 600; }
 /* ---------- Tarjetas de resultado (vidrio) ---------- */
 div[data-testid="stVerticalBlockBorderWrapper"] {
     background: var(--glass);
@@ -196,6 +201,21 @@ div[data-testid="stVerticalBlockBorderWrapper"]:has(.card-accent),
     border: 1.5px solid rgba(255, 138, 101, 0.60) !important;
     background: linear-gradient(135deg, rgba(255, 138, 101, 0.16), rgba(244, 114, 182, 0.09)) !important;
     box-shadow: 0 10px 34px rgba(244, 114, 182, 0.22) !important;
+}
+.st-key-card_causa p, .st-key-card_causa li,
+.st-key-card_solucion p, .st-key-card_solucion li {
+    font-size: 16px;
+    line-height: 1.65;
+    max-width: 78ch;
+}
+.st-key-card_causa strong, .st-key-card_solucion strong { color: #FFFFFF; }
+.field-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--coral);
+    margin: 12px 0 2px 0;
 }
 .result-head { display: flex; align-items: center; gap: 10px; margin: 30px 0 12px 0; }
 .result-title {
@@ -240,6 +260,32 @@ div[data-testid="stVerticalBlockBorderWrapper"]:has(.card-accent),
 .badge-alta { color: var(--ok); background: rgba(110, 231, 183, 0.10); }
 .badge-media { color: var(--warn); background: rgba(252, 211, 77, 0.10); }
 .badge-baja { color: var(--bad); background: rgba(253, 164, 175, 0.10); }
+/* ---------- Fuentes visibles bajo la causa raíz ---------- */
+.src-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    margin-top: 14px;
+    padding-top: 12px;
+    border-top: 1px solid rgba(255, 255, 255, 0.12);
+}
+.src-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-mute);
+}
+.src-chip {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--text-soft);
+    background: var(--glass);
+    border: 1px solid var(--glass-border);
+    border-radius: 999px;
+    padding: 3px 11px;
+}
 .empty-state {
     background: var(--glass);
     border: 1px dashed rgba(255, 255, 255, 0.28);
@@ -249,7 +295,7 @@ div[data-testid="stVerticalBlockBorderWrapper"]:has(.card-accent),
 }
 .empty-title { font-family: 'Fraunces', serif; font-weight: 600; font-size: 21px; color: var(--text); margin-bottom: 6px; }
 .empty-text { font-size: 14.5px; color: var(--text-soft); }
-.timing { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--text-mute); margin: 10px 0 0 2px; }
+.timing { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--text-mute); margin: 10px 0 14px 2px; }
 /* ---------- Evidencias ---------- */
 div[data-testid="stExpander"] details {
     background: var(--glass);
@@ -350,6 +396,37 @@ def usar_ejemplo(texto: str):
     st.session_state["lanzar"] = True
 
 
+def nueva_consulta():
+    """Callback de 'Nueva consulta': limpia el buscador y el resultado anterior."""
+    st.session_state["pregunta_input"] = ""
+    st.session_state.pop("ultimo", None)
+
+
+def fuentes_usadas(evidencias: list) -> list:
+    """Lista única de (archivo, página) de las evidencias que el modelo usó."""
+    vistas, resultado = set(), []
+    for ev in evidencias:
+        if not ev.get("usada"):
+            continue
+        clave = (ev["fuente"], ev["pagina"])
+        if clave not in vistas:
+            vistas.add(clave)
+            resultado.append(clave)
+    return resultado
+
+
+def html_fuentes(evidencias: list) -> str:
+    """Fila de chips con las fuentes que sustentan la respuesta."""
+    fuentes = fuentes_usadas(evidencias)
+    if not fuentes:
+        return ""
+    chips = "".join(
+        f'<span class="src-chip">{html.escape(f)}{f" · p. {p}" if p else ""}</span>'
+        for f, p in fuentes
+    )
+    return f'<div class="src-row"><span class="src-label">Fuentes</span>{chips}</div>'
+
+
 def html_evidencias(evidencias: list) -> str:
     """Arma el HTML de la lista de evidencias (una sola línea por fragmento, escapado)."""
     items = []
@@ -375,8 +452,30 @@ def html_evidencias(evidencias: list) -> str:
     return "".join(items)
 
 
-def mostrar_resultado(resultado: dict, origen: str):
-    """Pinta el análisis estructurado: causa raíz, solución, evidencias y tiempos."""
+def construir_markdown(pregunta: str, analisis, evidencias: list) -> str:
+    """Texto del análisis para descargar como .md."""
+    lineas = [
+        "# Análisis de causa raíz",
+        "",
+        f"**Consulta:** {pregunta}",
+        f"**Confianza:** {analisis.confianza}",
+        "",
+    ]
+    if analisis.incidente:
+        lineas += ["## Síntoma", analisis.incidente, ""]
+    lineas += ["## Causa raíz", analisis.causa_raiz, ""]
+    if analisis.solucion:
+        lineas += ["## Solución", analisis.solucion, ""]
+    fuentes = fuentes_usadas(evidencias)
+    if fuentes:
+        lineas += ["## Fuentes"]
+        lineas += [f"- {f}" + (f", p. {p}" if p else "") for f, p in fuentes]
+        lineas += [""]
+    return "\n".join(lineas)
+
+
+def mostrar_resultado(resultado: dict, origen: str, pregunta: str):
+    """Pinta el análisis estructurado: causa raíz, solución, evidencias, tiempos y acciones."""
     analisis = resultado["analisis"]
     evidencias = resultado["evidencias"]
 
@@ -404,8 +503,13 @@ def mostrar_resultado(resultado: dict, origen: str):
                 unsafe_allow_html=True,
             )
             if analisis.incidente:
-                st.markdown(f"**Incidente:** {analisis.incidente}")
+                st.markdown('<div class="field-label">Síntoma</div>', unsafe_allow_html=True)
+                st.markdown(analisis.incidente)
+            st.markdown('<div class="field-label">Causa</div>', unsafe_allow_html=True)
             st.markdown(analisis.causa_raiz)
+            fuentes_html = html_fuentes(evidencias)
+            if fuentes_html:
+                st.markdown(fuentes_html, unsafe_allow_html=True)
 
         with st.container(border=True, key="card_solucion"):
             st.markdown('<div class="card-head"><span class="card-title t-solucion">Solución</span></div>', unsafe_allow_html=True)
@@ -425,6 +529,34 @@ def mostrar_resultado(resultado: dict, origen: str):
         partes.append(f"Modelo {resultado['t_modelo']:.1f} s")
     partes.append(origen)
     st.markdown(f'<div class="timing">{" · ".join(partes)}</div>', unsafe_allow_html=True)
+
+    # Acciones sobre el resultado
+    col_descarga, col_nueva, _ = st.columns([1.5, 1.1, 2.4])
+    with col_descarga:
+        if analisis.encontrado:
+            contenido_md = construir_markdown(pregunta, analisis, evidencias)
+            try:
+                # on_click="ignore" evita que la descarga recargue la página y borre el resultado
+                st.download_button(
+                    "⬇ Descargar análisis",
+                    data=contenido_md,
+                    file_name="analisis_causa_raiz.md",
+                    mime="text/markdown",
+                    key="descargar",
+                    on_click="ignore",
+                    use_container_width=True,
+                )
+            except Exception:
+                st.download_button(
+                    "⬇ Descargar análisis",
+                    data=contenido_md,
+                    file_name="analisis_causa_raiz.md",
+                    mime="text/markdown",
+                    key="descargar",
+                    use_container_width=True,
+                )
+    with col_nueva:
+        st.button("Nueva consulta", key="nueva", on_click=nueva_consulta, use_container_width=True)
 
 
 # ---------------------------------------------------------------------------
@@ -489,6 +621,13 @@ columnas = st.columns(len(EJEMPLOS))
 for col, ejemplo in zip(columnas, EJEMPLOS):
     col.button(ejemplo, key=f"chip_{ejemplo}", on_click=usar_ejemplo, args=(ejemplo,), use_container_width=True)
 
+fuente_activa = "tus PDFs cargados" if usa_pdfs_propios else "base de conocimiento de LogisCore"
+st.markdown(
+    f'<div class="hint">Fuente activa: <b>{fuente_activa}</b> · '
+    "¿Tenés tus propios documentos? Abrí el panel lateral (<b>»</b>) y cargá tus PDFs.</div>",
+    unsafe_allow_html=True,
+)
+
 # ---------------------------------------------------------------------------
 # Ejecución
 # ---------------------------------------------------------------------------
@@ -499,6 +638,7 @@ if lanzar:
     if not pregunta:
         st.warning("Por favor escribí una pregunta.")
     else:
+        st.session_state.pop("ultimo", None)
         resultado = None
         origen = ""
         try:
@@ -527,4 +667,9 @@ if lanzar:
                 st.code(f"{type(e).__name__}: {e}")
 
         if resultado:
-            mostrar_resultado(resultado, origen)
+            # Se guarda para que el resultado sobreviva a otras interacciones (subir un PDF, descargar, etc.)
+            st.session_state["ultimo"] = {"resultado": resultado, "origen": origen, "pregunta": pregunta}
+
+ultimo = st.session_state.get("ultimo")
+if ultimo:
+    mostrar_resultado(ultimo["resultado"], ultimo["origen"], ultimo["pregunta"])
