@@ -32,10 +32,7 @@ EJEMPLOS = [
 ETIQUETAS_TIPO = {"incidente": "Incidente", "causa_raiz": "Causa raíz"}
 
 # ---------------------------------------------------------------------------
-# Estilos: degradado ciruela medio -> berenjena vinosa (mitad) -> berenjena oscuro.
-# Los rombos de líneas finas se desvanecen hasta un poco pasada la mitad y la parte baja queda lisa.
-# Vidrio translúcido en tarjetas y chips.
-# Todos los colores viven en variables CSS (:root).
+# Estilos (mejorados)
 # ---------------------------------------------------------------------------
 CSS = """
 <style>
@@ -49,7 +46,7 @@ CSS = """
     --ink: #2B1B36;
     --text: #F6EEF9;
     --text-soft: #DCCDE4;
-    --text-mute: #CDBBD8;
+    --text-mute: #E2D4EB;          /* más claro → mejor contraste */
     --glass: rgba(255, 255, 255, 0.08);
     --glass-strong: rgba(255, 255, 255, 0.145);
     --glass-border: rgba(255, 255, 255, 0.17);
@@ -81,7 +78,8 @@ html, body, [class*="css"], .stApp {
 }
 header[data-testid="stHeader"] { background: transparent; }
 div[data-testid="stAppDeployButton"], .stAppDeployButton { display: none; }
-.block-container { padding-top: 2rem; max-width: 840px; }
+.block-container { padding-top: 1.4rem; max-width: 840px; }   /* menos espacio arriba */
+
 /* ---------- Foco visible para teclado (accesibilidad) ---------- */
 button:focus-visible,
 summary:focus-visible,
@@ -89,8 +87,9 @@ a:focus-visible {
     outline: 2px solid var(--coral-soft) !important;
     outline-offset: 2px !important;
 }
+
 /* ---------- Hero ---------- */
-.hero { text-align: center; margin: 0.25rem 0 0.6rem 0; }
+.hero { text-align: center; margin: 0.15rem 0 0.5rem 0; }
 .hero-eyebrow {
     display: inline-block;
     font-family: 'JetBrains Mono', monospace;
@@ -102,7 +101,7 @@ a:focus-visible {
     border: 1px solid var(--glass-border);
     border-radius: 999px;
     padding: 5px 14px;
-    margin-bottom: 16px;
+    margin-bottom: 14px;
     backdrop-filter: blur(8px);
 }
 .hero-eyebrow b { color: var(--coral); font-weight: 500; }
@@ -124,7 +123,7 @@ a:focus-visible {
     color: transparent;
 }
 .hero-sub { font-size: 17px; color: var(--text-soft); margin: 0 auto; max-width: 520px; text-wrap: balance; }
-.hero-img { text-align: center; margin: 0 0 6px 0; }
+.hero-img { text-align: center; margin: 0 0 4px 0; }
 .hero-img img {
     width: 170px;
     mix-blend-mode: screen;
@@ -133,18 +132,18 @@ a:focus-visible {
     -webkit-mask-image: radial-gradient(closest-side, #000 55%, transparent 100%);
     mask-image: radial-gradient(closest-side, #000 55%, transparent 100%);
 }
-/* Hero compacto: se usa después de la primera consulta para subir el resultado */
 .hero-compact {
     display: flex;
     align-items: center;
     justify-content: center;
     flex-wrap: wrap;
     gap: 6px 16px;
-    margin: 0 0 14px 0;
+    margin: 0 0 12px 0;
 }
 .hero-compact .hero-eyebrow { margin: 0; font-size: 11px; padding: 4px 11px; }
 .hero-compact .hero-title { font-size: 28px; margin: 0; }
-/* ---------- Buscador (el st.form es la barra completa) ---------- */
+
+/* ---------- Buscador ---------- */
 div[data-testid="stForm"] {
     border: 1.5px solid transparent !important;
     border-radius: 18px;
@@ -155,7 +154,6 @@ div[data-testid="stForm"] {
     box-shadow: 0 12px 40px rgba(0, 0, 0, 0.28), 0 0 0 5px rgba(192, 75, 214, 0.08);
     transition: box-shadow 0.15s ease;
 }
-/* Foco visible: como el input no muestra su propio borde, el halo lo da toda la barra */
 div[data-testid="stForm"]:focus-within {
     box-shadow:
         0 12px 40px rgba(0, 0, 0, 0.28),
@@ -182,18 +180,23 @@ div[data-testid="stTextInput"] input {
     color: var(--text) !important;
     background: transparent !important;
 }
-div[data-testid="stTextInput"] input::placeholder { color: var(--text-mute) !important; opacity: 1; }
+/* Placeholder con mejor contraste */
+div[data-testid="stTextInput"] input::placeholder {
+    color: var(--text-mute) !important;
+    opacity: 0.92 !important;
+}
 div[data-testid="InputInstructions"] { display: none; }
-/* Botón principal: texto oscuro (--ink) sobre el degradado coral-rosa (contraste alto) */
+
+/* Botón Investigar — más destacado */
 div[data-testid="stFormSubmitButton"] button {
     border: none;
     border-radius: 12px;
-    padding: 0.65rem 0.8rem;
+    padding: 0.75rem 1.1rem;                 /* más padding */
     font-weight: 700;
-    font-size: 15px;
+    font-size: 15.5px;
     color: var(--ink) !important;
     background: linear-gradient(90deg, var(--coral), var(--pink));
-    box-shadow: 0 6px 18px rgba(244, 114, 182, 0.30);
+    box-shadow: 0 8px 22px rgba(244, 114, 182, 0.38);  /* sombra más fuerte */
     transition: transform 0.12s ease, box-shadow 0.12s ease;
 }
 div[data-testid="stFormSubmitButton"] button p,
@@ -202,13 +205,14 @@ div[data-testid="stFormSubmitButton"] button div {
     font-weight: 700;
 }
 div[data-testid="stFormSubmitButton"] button:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 10px 26px rgba(244, 114, 182, 0.42);
+    transform: translateY(-2px);
+    box-shadow: 0 12px 28px rgba(244, 114, 182, 0.50);
     color: var(--ink) !important;
     border: none;
 }
 div[data-testid="stFormSubmitButton"] button:active { transform: translateY(0); }
-/* ---------- Chips de ejemplo y botones secundarios ---------- */
+
+/* ---------- Chips de ejemplo — más clickeables ---------- */
 div[data-testid="stButton"] button,
 div[data-testid="stDownloadButton"] button {
     border-radius: 999px;
@@ -216,20 +220,24 @@ div[data-testid="stDownloadButton"] button {
     background: var(--glass-strong);
     color: var(--text);
     font-size: 13.5px;
-    padding: 0.4rem 0.9rem;
+    font-weight: 500;
+    padding: 0.5rem 1.15rem;                 /* más padding */
     backdrop-filter: blur(8px);
-    transition: border-color 0.12s ease, color 0.12s ease, background 0.12s ease;
+    transition: border-color 0.12s ease, color 0.12s ease, background 0.12s ease, transform 0.12s ease, box-shadow 0.12s ease;
 }
 div[data-testid="stButton"] button:hover,
 div[data-testid="stDownloadButton"] button:hover {
     border-color: var(--coral);
     color: #FFFFFF;
-    background: rgba(255, 138, 101, 0.18);
+    background: rgba(255, 138, 101, 0.22);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 14px rgba(255, 138, 101, 0.28);
 }
-.chips-label { font-size: 13px; color: var(--text-mute); text-align: center; margin: 16px 0 6px 0; }
-.hint { font-size: 13px; color: var(--text-mute); text-align: center; margin: 14px 0 0 0; }
+.chips-label { font-size: 13px; color: var(--text-mute); text-align: center; margin: 14px 0 8px 0; }
+.hint { font-size: 13px; color: var(--text-mute); text-align: center; margin: 12px 0 0 0; }
 .hint b { color: var(--text-soft); font-weight: 600; }
-/* ---------- Tarjetas de resultado (vidrio) ---------- */
+
+/* ---------- Tarjetas de resultado ---------- */
 div[data-testid="stVerticalBlockBorderWrapper"] {
     background: var(--glass);
     border: 1px solid var(--glass-border);
@@ -257,7 +265,6 @@ div[data-testid="stVerticalBlockBorderWrapper"]:has(.card-accent),
     color: var(--coral);
     margin: 12px 0 2px 0;
 }
-/* Jerarquía dentro de la tarjeta de causa raíz: la causa manda, el síntoma da contexto */
 .txt-sintoma {
     font-size: 14.5px;
     line-height: 1.6;
@@ -273,7 +280,7 @@ div[data-testid="stVerticalBlockBorderWrapper"]:has(.card-accent),
 }
 .txt-sintoma strong, .txt-causa strong { color: #FFFFFF; font-weight: 700; }
 .txt-causa strong { color: var(--coral-soft); }
-.result-head { display: flex; align-items: center; gap: 10px; margin: 30px 0 12px 0; }
+.result-head { display: flex; align-items: center; gap: 10px; margin: 26px 0 12px 0; }
 .result-title {
     font-family: 'Fraunces', serif;
     font-weight: 600;
@@ -305,7 +312,8 @@ div[data-testid="stVerticalBlockBorderWrapper"]:has(.card-accent),
 .badge-alta { color: var(--ok); background: rgba(110, 231, 183, 0.10); }
 .badge-media { color: var(--warn); background: rgba(252, 211, 77, 0.10); }
 .badge-baja { color: var(--bad); background: rgba(253, 164, 175, 0.10); }
-/* ---------- Fuentes visibles bajo la causa raíz ---------- */
+
+/* ---------- Fuentes ---------- */
 .src-row {
     display: flex;
     flex-wrap: wrap;
@@ -341,6 +349,7 @@ div[data-testid="stVerticalBlockBorderWrapper"]:has(.card-accent),
 .empty-title { font-family: 'Fraunces', serif; font-weight: 600; font-size: 21px; color: var(--text); margin-bottom: 6px; }
 .empty-text { font-size: 14.5px; color: var(--text-soft); }
 .timing { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--text-mute); margin: 10px 0 14px 2px; }
+
 /* ---------- Evidencias ---------- */
 div[data-testid="stExpander"] details {
     background: var(--glass);
@@ -382,6 +391,7 @@ div[data-testid="stExpander"] summary { color: var(--text-soft); }
     border-left: 2px solid rgba(255, 138, 101, 0.55);
     padding-left: 12px;
 }
+
 /* ---------- Sidebar ---------- */
 section[data-testid="stSidebar"] {
     background: var(--sidebar);
@@ -400,15 +410,19 @@ section[data-testid="stFileUploaderDropzone"] button {
     color: var(--text);
 }
 .sb-note { font-size: 13px; color: var(--text-soft); line-height: 1.45; margin-bottom: 14px; }
+
 /* ---------- Mobile ---------- */
 @media (max-width: 640px) {
     .hero-title { font-size: 36px; }
     .hero-compact .hero-title { font-size: 24px; }
     .txt-causa { font-size: 17px; }
-    /* Objetivo táctil mínimo de 44 px para chips y botones secundarios */
     div[data-testid="stButton"] button,
     div[data-testid="stDownloadButton"] button {
         min-height: 44px;
+        padding: 0.55rem 1rem;
+    }
+    div[data-testid="stFormSubmitButton"] button {
+        padding: 0.8rem 1rem;
     }
 }
 </style>
@@ -626,7 +640,6 @@ def mostrar_resultado(resultado: dict, origen: str, pregunta: str):
         if analisis.encontrado:
             contenido_md = construir_markdown(pregunta, analisis, evidencias)
             try:
-                # on_click="ignore" evita que la descarga recargue la página y borre el resultado
                 st.download_button(
                     "⬇ Descargar análisis",
                     data=contenido_md,
@@ -673,16 +686,15 @@ elif usa_pdfs_propios:
     st.sidebar.success("Usando tus PDFs como contexto.")
 
 # ---------------------------------------------------------------------------
-# Hero (se reserva el lugar acá y se rellena más abajo, cuando ya se sabe si
-# hay una consulta en curso o un resultado: en ese caso se muestra compacto)
+# Hero
 # ---------------------------------------------------------------------------
 hero_slot = st.empty()
 
 # ---------------------------------------------------------------------------
-# Buscador (st.form: Enter también envía la consulta)
+# Buscador
 # ---------------------------------------------------------------------------
 with st.form("form_busqueda", clear_on_submit=False, border=False):
-    col_input, col_boton = st.columns([5, 1.5], vertical_alignment="center")
+    col_input, col_boton = st.columns([4.8, 1.7], vertical_alignment="center")  # botón un poco más ancho
     with col_input:
         st.text_input(
             "¿Qué incidente querés investigar?",
@@ -711,8 +723,6 @@ st.markdown(
 lanzar = enviado or st.session_state.pop("lanzar", False)
 pregunta = st.session_state.get("pregunta_input", "").strip()
 
-# Hero compacto si ya hay un resultado guardado o si esta pasada lanza una búsqueda válida;
-# con "Nueva consulta" vuelve el hero completo.
 hero_compacto = bool(st.session_state.get("ultimo")) or (lanzar and bool(pregunta))
 hero_slot.markdown(html_hero(hero_compacto), unsafe_allow_html=True)
 
@@ -749,7 +759,6 @@ if lanzar:
                 st.code(f"{type(e).__name__}: {e}")
 
         if resultado:
-            # Se guarda para que el resultado sobreviva a otras interacciones (subir un PDF, descargar, etc.)
             st.session_state["ultimo"] = {"resultado": resultado, "origen": origen, "pregunta": pregunta}
 
 ultimo = st.session_state.get("ultimo")
