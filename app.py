@@ -32,21 +32,23 @@ EJEMPLOS = [
 ETIQUETAS_TIPO = {"incidente": "Incidente", "causa_raiz": "Causa raíz"}
 
 # ---------------------------------------------------------------------------
-# Estilos: ciruela medio + vidrio translúcido (opción A).
+# Estilos: degradado ciruela medio -> ciruela oscuro -> berenjena vinosa,
+# rombos de líneas finas + vidrio translúcido.
 # Todos los colores viven en variables CSS (:root).
 # ---------------------------------------------------------------------------
 CSS = """
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
 :root {
-    --bg-top: #2B1B36;
-    --bg-mid: #3D2450;
-    --bg-bottom: #4A2D5C;
+    --bg-top: #4A2D5C;
+    --bg-mid: #2B1B36;
+    --bg-bottom: #3F1A35;
+    --ink: #2B1B36;
     --text: #F6EEF9;
     --text-soft: #DCCDE4;
-    --text-mute: #BDA8C8;
+    --text-mute: #CDBBD8;
     --glass: rgba(255, 255, 255, 0.08);
-    --glass-strong: rgba(255, 255, 255, 0.12);
+    --glass-strong: rgba(255, 255, 255, 0.145);
     --glass-border: rgba(255, 255, 255, 0.17);
     --chip-border: rgba(255, 255, 255, 0.32);
     --coral: #FF8A65;
@@ -56,8 +58,9 @@ CSS = """
     --ok: #6EE7B7;
     --warn: #FCD34D;
     --bad: #FDA4AF;
-    --pattern: rgba(255, 255, 255, 0.055);
-    --sidebar: rgba(28, 16, 38, 0.94);
+    --pattern: rgba(255, 255, 255, 0.07);
+    --sidebar: rgba(42, 16, 34, 0.94);
+    --bar-bg: rgba(36, 14, 30, 0.88);
 }
 html, body, [class*="css"], .stApp {
     font-family: 'Inter', sans-serif;
@@ -67,8 +70,8 @@ html, body, [class*="css"], .stApp {
     background-color: var(--bg-top);
     background-image:
         radial-gradient(900px 420px at 50% -6%, rgba(244, 114, 182, 0.24), transparent 62%),
-        repeating-linear-gradient(45deg, var(--pattern) 0 1px, transparent 1px 64px),
-        repeating-linear-gradient(-45deg, var(--pattern) 0 1px, transparent 1px 64px),
+        repeating-linear-gradient(45deg, var(--pattern) 0 1px, transparent 1px 88px),
+        repeating-linear-gradient(-45deg, var(--pattern) 0 1px, transparent 1px 88px),
         linear-gradient(180deg, var(--bg-top) 0%, var(--bg-mid) 55%, var(--bg-bottom) 100%);
     background-attachment: fixed;
 }
@@ -143,7 +146,7 @@ div[data-testid="stForm"] {
     border-radius: 18px;
     padding: 8px 10px;
     background:
-        linear-gradient(rgba(34, 20, 45, 0.88), rgba(34, 20, 45, 0.88)) padding-box,
+        linear-gradient(var(--bar-bg), var(--bar-bg)) padding-box,
         linear-gradient(90deg, var(--coral), var(--violet)) border-box;
     box-shadow: 0 12px 40px rgba(0, 0, 0, 0.28), 0 0 0 5px rgba(192, 75, 214, 0.08);
     transition: box-shadow 0.15s ease;
@@ -177,27 +180,27 @@ div[data-testid="stTextInput"] input {
 }
 div[data-testid="stTextInput"] input::placeholder { color: var(--text-mute) !important; opacity: 1; }
 div[data-testid="InputInstructions"] { display: none; }
-/* Botón principal: texto oscuro sobre el degradado coral-rosa (contraste alto) */
+/* Botón principal: texto oscuro (--ink) sobre el degradado coral-rosa (contraste alto) */
 div[data-testid="stFormSubmitButton"] button {
     border: none;
     border-radius: 12px;
     padding: 0.65rem 0.8rem;
     font-weight: 700;
     font-size: 15px;
-    color: var(--bg-top) !important;
+    color: var(--ink) !important;
     background: linear-gradient(90deg, var(--coral), var(--pink));
     box-shadow: 0 6px 18px rgba(244, 114, 182, 0.30);
     transition: transform 0.12s ease, box-shadow 0.12s ease;
 }
 div[data-testid="stFormSubmitButton"] button p,
 div[data-testid="stFormSubmitButton"] button div {
-    color: var(--bg-top) !important;
+    color: var(--ink) !important;
     font-weight: 700;
 }
 div[data-testid="stFormSubmitButton"] button:hover {
     transform: translateY(-1px);
     box-shadow: 0 10px 26px rgba(244, 114, 182, 0.42);
-    color: var(--bg-top) !important;
+    color: var(--ink) !important;
     border: none;
 }
 div[data-testid="stFormSubmitButton"] button:active { transform: translateY(0); }
@@ -398,6 +401,11 @@ section[data-testid="stFileUploaderDropzone"] button {
     .hero-title { font-size: 36px; }
     .hero-compact .hero-title { font-size: 24px; }
     .txt-causa { font-size: 17px; }
+    /* Objetivo táctil mínimo de 44 px para chips y botones secundarios */
+    div[data-testid="stButton"] button,
+    div[data-testid="stDownloadButton"] button {
+        min-height: 44px;
+    }
 }
 </style>
 """
