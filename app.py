@@ -32,8 +32,9 @@ EJEMPLOS = [
 ETIQUETAS_TIPO = {"incidente": "Incidente", "causa_raiz": "Causa raíz"}
 
 # ---------------------------------------------------------------------------
-# Estilos: degradado ciruela medio -> ciruela oscuro -> berenjena vinosa,
-# rombos de líneas finas + vidrio translúcido.
+# Estilos: degradado ciruela medio -> berenjena vinosa (mitad) -> berenjena oscuro.
+# Los rombos de líneas finas se desvanecen hasta un poco pasada la mitad y la parte baja queda lisa.
+# Vidrio translúcido en tarjetas y chips.
 # Todos los colores viven en variables CSS (:root).
 # ---------------------------------------------------------------------------
 CSS = """
@@ -41,8 +42,10 @@ CSS = """
 @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
 :root {
     --bg-top: #4A2D5C;
-    --bg-mid: #2B1B36;
-    --bg-bottom: #3F1A35;
+    --bg-mid: #3B152F;
+    --bg-lower: #35132B;
+    --bg-bottom: #230C1F;
+    --bg-fade: rgba(70, 38, 79, 0);
     --ink: #2B1B36;
     --text: #F6EEF9;
     --text-soft: #DCCDE4;
@@ -58,7 +61,7 @@ CSS = """
     --ok: #6EE7B7;
     --warn: #FCD34D;
     --bad: #FDA4AF;
-    --pattern: rgba(255, 255, 255, 0.07);
+    --pattern: rgba(255, 255, 255, 0.085);
     --sidebar: rgba(42, 16, 34, 0.94);
     --bar-bg: rgba(36, 14, 30, 0.88);
 }
@@ -70,9 +73,10 @@ html, body, [class*="css"], .stApp {
     background-color: var(--bg-top);
     background-image:
         radial-gradient(900px 420px at 50% -6%, rgba(244, 114, 182, 0.24), transparent 62%),
+        linear-gradient(180deg, var(--bg-fade) 0%, var(--bg-fade) 15%, var(--bg-lower) 62%, var(--bg-bottom) 100%),
         repeating-linear-gradient(45deg, var(--pattern) 0 1px, transparent 1px 88px),
         repeating-linear-gradient(-45deg, var(--pattern) 0 1px, transparent 1px 88px),
-        linear-gradient(180deg, var(--bg-top) 0%, var(--bg-mid) 55%, var(--bg-bottom) 100%);
+        linear-gradient(180deg, var(--bg-top) 0%, var(--bg-mid) 50%, var(--bg-bottom) 100%);
     background-attachment: fixed;
 }
 header[data-testid="stHeader"] { background: transparent; }
