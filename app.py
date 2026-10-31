@@ -43,6 +43,10 @@ CSS = """
     --bg-lower: #35132B;
     --bg-bottom: #230C1F;
     --bg-fade: rgba(70, 38, 79, 0);
+    /* Berenjena violácea oscura: destino del fondo al bajar al análisis */
+    --berenjena-top: #2D1347;
+    --berenjena-mid: #1F0B34;
+    --berenjena-bottom: #12061F;
     --ink: #2B1B36;
     --text: #F6EEF9;
     --text-soft: #DCCDE4;
@@ -75,10 +79,53 @@ html, body, [class*="css"], .stApp {
         repeating-linear-gradient(-45deg, var(--pattern) 0 1px, transparent 1px 88px),
         linear-gradient(180deg, var(--bg-top) 0%, var(--bg-mid) 50%, var(--bg-bottom) 100%);
     background-attachment: fixed;
+    isolation: isolate;   /* contexto propio: la capa berenjena queda detrás del contenido */
 }
 header[data-testid="stHeader"] { background: transparent; }
 div[data-testid="stAppDeployButton"], .stAppDeployButton { display: none; }
 .block-container { padding-top: 1.4rem; max-width: 840px; }   /* menos espacio arriba */
+
+/* ---------- Fondo que se oscurece al bajar al análisis ----------
+   Capa berenjena fija sobre el fondo vinoso. Su opacidad (0 → 1) avanza con el
+   scroll del área principal, solo cuando hay un análisis en pantalla.
+   Como el progreso se mide sobre el recorrido real del scroll, funciona igual
+   con poco o con mucho scroll. Sin soporte (p. ej. Firefox) el fondo queda vinoso. */
+.stApp::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    opacity: 0;
+    background-color: var(--berenjena-mid);
+    background-image:
+        radial-gradient(900px 420px at 50% -6%, rgba(244, 114, 182, 0.10), transparent 62%),
+        repeating-linear-gradient(45deg, var(--pattern) 0 1px, transparent 1px 88px),
+        repeating-linear-gradient(-45deg, var(--pattern) 0 1px, transparent 1px 88px),
+        linear-gradient(180deg, var(--berenjena-top) 0%, var(--berenjena-mid) 50%, var(--berenjena-bottom) 100%);
+}
+@keyframes oscurecer-fondo {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+@supports (animation-timeline: scroll()) {
+    .stApp { timeline-scope: --rc-scroll; }
+    [data-testid="stMain"],
+    section.main {
+        scroll-timeline: --rc-scroll block;
+    }
+    .stApp:has(.result-head)::before {
+        animation: oscurecer-fondo 1s linear both;
+        animation-timeline: --rc-scroll;
+        animation-range-start: 0px;
+        animation-range-end: min(100%, 360px);   /* llega al tope en 360 px, o antes si la página es corta */
+    }
+    /* Con un análisis en pantalla, la página siempre tiene al menos ~220 px de scroll.
+       Así el fondo cambia aunque el resultado quepa entero en una pantalla alta. */
+    .stApp:has(.result-head) .block-container {
+        min-height: calc(100vh + 220px);
+    }
+}
 
 /* ---------- Foco visible para teclado (accesibilidad) ---------- */
 button:focus-visible,
@@ -249,7 +296,6 @@ div[data-testid="stVerticalBlockBorderWrapper"]:has(.card-accent),
 .st-key-card_causa {
     border: 1.5px solid rgba(255, 138, 101, 0.60) !important;
     background: linear-gradient(135deg, rgba(255, 138, 101, 0.16), rgba(244, 114, 182, 0.09)) !important;
-    box-shadow: 0 10px 34px rgba(244, 114, 182, 0.22) !important;
 }
 .st-key-card_solucion p, .st-key-card_solucion li {
     font-size: 16px;
@@ -257,6 +303,129 @@ div[data-testid="stVerticalBlockBorderWrapper"]:has(.card-accent),
     max-width: 78ch;
 }
 .st-key-card_solucion strong { color: #FFFFFF; }
+
+/* ---------- Tarjetas flotantes ----------
+   1) Sombra en capas + filo de luz arriba: parecen suspendidas sobre el fondo.
+   2) Al pasar el mouse se elevan unos px y la sombra se agranda.
+   3) Al aparecer el análisis suben con un fundido, una tras otra.
+   Los selectores cubren las distintas versiones de Streamlit (la clase de la tarjeta
+   puede estar en la caja misma o en el bloque interior de un contenedor con borde). */
+:root {
+    --float-ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+    --shadow-float:
+        inset 0 1px 0 rgba(255, 255, 255, 0.24),
+        0 2px 4px rgba(8, 2, 14, 0.30),
+        0 18px 34px -8px rgba(8, 2, 14, 0.60),
+        0 38px 70px -16px rgba(150, 50, 200, 0.50);   /* halo violeta: se nota sobre el fondo oscuro */
+    --shadow-float-hover:
+        inset 0 1px 0 rgba(255, 255, 255, 0.32),
+        0 4px 8px rgba(8, 2, 14, 0.34),
+        0 28px 48px -10px rgba(8, 2, 14, 0.62),
+        0 56px 96px -18px rgba(170, 60, 220, 0.70);
+    /* Cristal violáceo: translúcido pero lo bastante cubriente para que los rombos del fondo
+       no se vean detrás del texto (contraste del texto sobre la tarjeta > 10:1, WCAG AAA). */
+    --card-violet: rgba(50, 20, 74, 0.90);
+    --card-violet-soft: rgba(44, 17, 66, 0.88);
+    --card-border: rgba(196, 150, 255, 0.26);
+}
+:is(
+    div[data-testid="stVerticalBlockBorderWrapper"]:has(> .st-key-card_solucion),
+    div:not([data-testid="stVerticalBlockBorderWrapper"]) > .st-key-card_solucion,
+    div[data-testid="stExpander"]
+) {
+    box-shadow: var(--shadow-float) !important;
+}
+:is(
+    div[data-testid="stVerticalBlockBorderWrapper"]:has(> .st-key-card_causa),
+    div:not([data-testid="stVerticalBlockBorderWrapper"]) > .st-key-card_causa
+) {
+    box-shadow: var(--shadow-float), 0 18px 54px rgba(244, 114, 182, 0.34) !important;
+}
+div[data-testid="stExpander"] { border-radius: 14px; }
+
+/* Fondo violáceo translúcido en las tres tarjetas (misma familia de color = consistencia).
+   Causa raíz conserva su acento coral como punto focal. */
+:is(
+    div[data-testid="stVerticalBlockBorderWrapper"]:has(> .st-key-card_solucion),
+    div:not([data-testid="stVerticalBlockBorderWrapper"]) > .st-key-card_solucion
+) {
+    background: var(--card-violet-soft) !important;
+    border: 1px solid var(--card-border) !important;
+    border-radius: 18px;
+    -webkit-backdrop-filter: blur(18px) saturate(1.15);
+    backdrop-filter: blur(18px) saturate(1.15);
+}
+:is(
+    div[data-testid="stVerticalBlockBorderWrapper"]:has(> .st-key-card_causa),
+    div:not([data-testid="stVerticalBlockBorderWrapper"]) > .st-key-card_causa
+) {
+    background:
+        linear-gradient(135deg, rgba(255, 138, 101, 0.15), rgba(244, 114, 182, 0.07)),
+        var(--card-violet) !important;
+    -webkit-backdrop-filter: blur(18px) saturate(1.15);
+    backdrop-filter: blur(18px) saturate(1.15);
+}
+
+/* Ritmo vertical sobre una escala de 8 px: Causa → Solución 48 px (se lee como paso
+   siguiente, sin separarlas tanto que pierdan la relación), Solución → Evidencias 32 px. */
+:is(
+    div[data-testid="stVerticalBlockBorderWrapper"]:has(> .st-key-card_solucion),
+    div:not([data-testid="stVerticalBlockBorderWrapper"]) > .st-key-card_solucion
+) {
+    margin-top: 2rem;
+}
+div[data-testid="stExpander"] { margin-top: 1rem; }
+
+@keyframes flotar-entrada {
+    from { opacity: 0; transform: translateY(22px) scale(0.985); }
+    to   { opacity: 1; transform: none; }
+}
+/* Vaivén suave y continuo. Usa la propiedad "translate" (no "transform") para sumarse
+   a la entrada y a la elevación del hover sin pisarlas. */
+@keyframes flotar-vaiven {
+    0%, 100% { translate: 0 0; }
+    50%      { translate: 0 -6px; }
+}
+@media (prefers-reduced-motion: no-preference) {
+    :is(
+        div[data-testid="stVerticalBlockBorderWrapper"]:has(> .st-key-card_causa),
+        div:not([data-testid="stVerticalBlockBorderWrapper"]) > .st-key-card_causa,
+        div[data-testid="stVerticalBlockBorderWrapper"]:has(> .st-key-card_solucion),
+        div:not([data-testid="stVerticalBlockBorderWrapper"]) > .st-key-card_solucion,
+        div[data-testid="stExpander"]
+    ) {
+        transition: transform 0.3s var(--float-ease), box-shadow 0.3s ease;
+        /* "backwards": al terminar la entrada no bloquea el hover */
+        animation:
+            flotar-entrada 0.65s var(--float-ease) backwards,
+            flotar-vaiven 7s ease-in-out 0.7s infinite;
+    }
+    :is(
+        div[data-testid="stVerticalBlockBorderWrapper"]:has(> .st-key-card_solucion),
+        div:not([data-testid="stVerticalBlockBorderWrapper"]) > .st-key-card_solucion
+    ) { animation-delay: 0.12s, 1.8s; }
+    .stApp div[data-testid="stExpander"] { animation-delay: 0.24s, 2.9s; }
+}
+@media (prefers-reduced-motion: no-preference) and (hover: hover) {
+    :is(
+        div[data-testid="stVerticalBlockBorderWrapper"]:has(> .st-key-card_solucion),
+        div:not([data-testid="stVerticalBlockBorderWrapper"]) > .st-key-card_solucion,
+        div[data-testid="stExpander"]
+    ):hover {
+        transform: translateY(-8px);
+        box-shadow: var(--shadow-float-hover) !important;
+        animation-play-state: running, paused;   /* al interactuar, el vaivén se congela: el contenido queda estable */
+    }
+    :is(
+        div[data-testid="stVerticalBlockBorderWrapper"]:has(> .st-key-card_causa),
+        div:not([data-testid="stVerticalBlockBorderWrapper"]) > .st-key-card_causa
+    ):hover {
+        transform: translateY(-8px);
+        box-shadow: var(--shadow-float-hover), 0 26px 64px rgba(244, 114, 182, 0.46) !important;
+        animation-play-state: running, paused;
+    }
+}
+
 .field-label {
     font-family: 'JetBrains Mono', monospace;
     font-size: 11px;
@@ -352,10 +521,11 @@ div[data-testid="stVerticalBlockBorderWrapper"]:has(.card-accent),
 
 /* ---------- Evidencias ---------- */
 div[data-testid="stExpander"] details {
-    background: var(--glass);
-    border: 1px solid var(--glass-border);
+    background: var(--card-violet-soft);
+    border: 1px solid var(--card-border);
     border-radius: 14px;
-    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(18px) saturate(1.15);
+    backdrop-filter: blur(18px) saturate(1.15);
 }
 div[data-testid="stExpander"] summary { color: var(--text-soft); }
 .ev-item { padding: 12px 0; border-bottom: 1px solid rgba(255, 255, 255, 0.10); }
