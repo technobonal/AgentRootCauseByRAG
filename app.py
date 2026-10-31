@@ -316,12 +316,12 @@ div[data-testid="stVerticalBlockBorderWrapper"]:has(.card-accent),
         inset 0 1px 0 rgba(255, 255, 255, 0.24),
         0 2px 4px rgba(8, 2, 14, 0.30),
         0 18px 34px -8px rgba(8, 2, 14, 0.60),
-        0 38px 70px -16px rgba(150, 50, 200, 0.50);   /* halo violeta: se nota sobre el fondo oscuro */
+        0 30px 56px -22px rgba(150, 50, 200, 0.26);   /* halo violeta sutil: da aire sin competir con el texto */
     --shadow-float-hover:
         inset 0 1px 0 rgba(255, 255, 255, 0.32),
         0 4px 8px rgba(8, 2, 14, 0.34),
         0 28px 48px -10px rgba(8, 2, 14, 0.62),
-        0 56px 96px -18px rgba(170, 60, 220, 0.70);
+        0 44px 80px -22px rgba(170, 60, 220, 0.42);   /* al interactuar el halo sube: señal de que es "levantable" */
     /* Cristal violáceo: translúcido pero lo bastante cubriente para que los rombos del fondo
        no se vean detrás del texto (contraste del texto sobre la tarjeta > 10:1, WCAG AAA). */
     --card-violet: rgba(50, 20, 74, 0.90);
@@ -339,7 +339,7 @@ div[data-testid="stVerticalBlockBorderWrapper"]:has(.card-accent),
     div[data-testid="stVerticalBlockBorderWrapper"]:has(> .st-key-card_causa),
     div:not([data-testid="stVerticalBlockBorderWrapper"]) > .st-key-card_causa
 ) {
-    box-shadow: var(--shadow-float), 0 18px 54px rgba(244, 114, 182, 0.34) !important;
+    box-shadow: var(--shadow-float), 0 14px 40px -8px rgba(244, 114, 182, 0.16) !important;
 }
 div[data-testid="stExpander"] { border-radius: 14px; }
 
@@ -421,7 +421,7 @@ div[data-testid="stExpander"] { margin-top: 1rem; }
         div:not([data-testid="stVerticalBlockBorderWrapper"]) > .st-key-card_causa
     ):hover {
         transform: translateY(-8px);
-        box-shadow: var(--shadow-float-hover), 0 26px 64px rgba(244, 114, 182, 0.46) !important;
+        box-shadow: var(--shadow-float-hover), 0 20px 52px -8px rgba(244, 114, 182, 0.26) !important;
         animation-play-state: running, paused;
     }
 }
@@ -528,6 +528,18 @@ div[data-testid="stExpander"] details {
     backdrop-filter: blur(18px) saturate(1.15);
 }
 div[data-testid="stExpander"] summary { color: var(--text-soft); }
+/* Abierto, Streamlit le pone a la barra del título un fondo gris claro y el texto claro
+   queda ilegible: se deja transparente sobre la tarjeta violeta y se da feedback al hover. */
+div[data-testid="stExpander"] summary,
+div[data-testid="stExpander"] details[open] > summary {
+    background: transparent !important;
+    border-radius: 14px;
+}
+div[data-testid="stExpander"] summary:hover,
+div[data-testid="stExpander"] details[open] > summary:hover {
+    background: rgba(255, 255, 255, 0.07) !important;
+    color: #FFFFFF;
+}
 .ev-item { padding: 12px 0; border-bottom: 1px solid rgba(255, 255, 255, 0.10); }
 .ev-item:last-child { border-bottom: none; }
 .ev-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-bottom: 8px; }
@@ -554,6 +566,23 @@ div[data-testid="stExpander"] summary { color: var(--text-soft); }
 .ev-bar { height: 4px; border-radius: 999px; background: rgba(255, 255, 255, 0.10); overflow: hidden; }
 .ev-fill { height: 100%; border-radius: 999px; background: linear-gradient(90deg, var(--coral), var(--pink)); }
 .ev-rel { font-size: 11.5px; color: var(--text-mute); margin: 4px 0 8px 0; }
+.ev-best {
+    font-size: 11px;
+    color: var(--coral-soft);
+    background: rgba(255, 138, 101, 0.12);
+    border: 1px solid rgba(255, 138, 101, 0.34);
+    border-radius: 999px;
+    padding: 2px 9px;
+}
+.ev-note {
+    font-size: 12.5px;
+    line-height: 1.55;
+    color: var(--text-mute);
+    padding: 2px 0 12px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.10);
+}
+.ev-note b { color: var(--text-soft); font-weight: 600; }
+.badge[title] { cursor: help; }
 .ev-text {
     font-size: 13.5px;
     line-height: 1.5;
@@ -696,13 +725,43 @@ def html_fuentes(evidencias: list) -> str:
     return f'<div class="src-row"><span class="src-label">Fuentes</span>{chips}</div>'
 
 
+NOTA_EVIDENCIAS = (
+    '<div class="ev-note"><b>Similitud</b>: qué tan parecido es cada fragmento a tu consulta '
+    "(lo mide el buscador); la barra compara los fragmentos entre sí. "
+    "<b>Confianza</b>: cuánto respalda el contexto la respuesta; la estima el modelo y se baja "
+    "si la similitud es débil.</div>"
+)
+
+
+def texto_ayuda_confianza(resultado: dict, confianza: str) -> str:
+    """Texto del tooltip del indicador de Confianza: explica de dónde sale."""
+    if not resultado.get("evidencias"):
+        return "Estimada por el modelo según cuánto respalda el contexto la respuesta."
+    texto = (
+        "Combina el juicio del modelo con qué tan parecidas son las evidencias "
+        "recuperadas a tu consulta."
+    )
+    if resultado.get("ajustada") and resultado.get("similitud_base") is not None:
+        pct = int(round(resultado["similitud_base"] * 100))
+        texto += (
+            f" El modelo estimó «{resultado.get('confianza_modelo')}», pero la mejor evidencia "
+            f"usada tiene una similitud de {pct}%, así que se muestra «{confianza}»."
+        )
+    return texto
+
+
 def html_evidencias(evidencias: list) -> str:
     """Arma el HTML de la lista de evidencias (una sola línea por fragmento, escapado)."""
     items = []
     for ev in evidencias:
-        pct = int(round(ev["relevancia"] * 100))
+        # Similitud real del buscador (ev["relevancia"] queda como respaldo para datos viejos).
+        sim = max(0.0, min(1.0, ev.get("puntaje", ev.get("relevancia", 0.0))))
+        pct = int(round(sim * 100))
+        # La barra compara con el fragmento más similar; si no hay dato, usa la similitud directa.
+        ancho = int(round(max(0.0, min(1.0, ev.get("similitud_relativa", sim))) * 100))
         tipo = ETIQUETAS_TIPO.get(ev["tipo"], str(ev["tipo"]).capitalize())
         pagina = f" · p. {ev['pagina']}" if ev["pagina"] else ""
+        mejor = '<span class="ev-best">mejor coincidencia</span>' if ev.get("mejor") else ""
         usada = '<span class="ev-used">usada en el análisis</span>' if ev.get("usada") else ""
 
         texto = re.sub(r"\s*\n\s*", " ", ev["texto"]).strip()
@@ -712,13 +771,14 @@ def html_evidencias(evidencias: list) -> str:
         items.append(
             '<div class="ev-item">'
             f'<div class="ev-meta"><span class="ev-tipo">{html.escape(tipo)}</span>'
-            f'<span class="ev-src">{html.escape(ev["fuente"])}{pagina}</span>{usada}</div>'
-            f'<div class="ev-bar"><div class="ev-fill" style="width:{pct}%"></div></div>'
-            f'<div class="ev-rel">Relevancia {pct}%</div>'
+            f'<span class="ev-src">{html.escape(ev["fuente"])}{pagina}</span>{mejor}{usada}</div>'
+            f'<div class="ev-bar" title="La barra compara este fragmento con el más similar">'
+            f'<div class="ev-fill" style="width:{ancho}%"></div></div>'
+            f'<div class="ev-rel">Similitud {pct}%</div>'
             f'<div class="ev-text">{html.escape(texto)}</div>'
             "</div>"
         )
-    return "".join(items)
+    return NOTA_EVIDENCIAS + "".join(items)
 
 
 def construir_markdown(pregunta: str, analisis, evidencias: list) -> str:
@@ -767,7 +827,9 @@ def mostrar_resultado(resultado: dict, origen: str, pregunta: str):
             st.markdown('<div class="card-accent"></div>', unsafe_allow_html=True)
             st.markdown(
                 '<div class="card-head"><span class="card-title t-causa">Causa raíz</span>'
-                f'<span class="badge badge-{analisis.confianza}">Confianza {analisis.confianza}</span></div>',
+                f'<span class="badge badge-{analisis.confianza}" '
+                f'title="{html.escape(texto_ayuda_confianza(resultado, analisis.confianza), quote=True)}">'
+                f'Confianza {analisis.confianza}</span></div>',
                 unsafe_allow_html=True,
             )
             if analisis.incidente:

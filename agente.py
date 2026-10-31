@@ -81,7 +81,11 @@ class AnalisisRCA(BaseModel):
         description="La causa raíz técnica, en una a tres oraciones. Vacío si no se encontró."
     )
     solucion: Optional[str] = Field(
-        description="Solución técnica propuesta en el contexto, o null si el contexto no propone ninguna."
+        description=(
+            "Pasos de solución propuestos en el contexto, como lista numerada markdown "
+            "(un paso por línea, máximo 5, cada uno con la acción clave en **negrita**), "
+            "o null si el contexto no propone ninguna."
+        )
     )
     confianza: Literal["alta", "media", "baja"] = Field(
         description="Qué tan bien respalda el contexto la respuesta."
@@ -116,8 +120,16 @@ Reglas que debés seguir siempre:
    encontrado=false y dejá incidente y causa_raiz vacíos.
 2. incidente: el síntoma, en una oración. causa_raiz: la causa técnica, en una a tres oraciones;
    resaltá en **negrita** el concepto técnico clave (máximo dos frases cortas).
-3. solucion: solo si el contexto propone una solución técnica; si no, null. Si son varios pasos,
-   usá una lista numerada markdown (1., 2., 3.), un paso por línea; si es uno solo, una oración.
+3. solucion: solo si el contexto propone una solución técnica; si no, null. No la deduzcas ni la
+   completes con buenas prácticas generales que el contexto no mencione. Formato:
+   - Varios pasos: lista numerada markdown (1., 2., 3.), un paso por línea, en orden de ejecución,
+     máximo 5 pasos. Un solo paso: una oración.
+   - Cada paso empieza con un verbo en imperativo y resalta en **negrita** la acción o el componente
+     técnico clave (una frase corta por paso). Ejemplo de forma: "1. **Validar el parámetro** antes
+     de ejecutar el proceso."
+   - Si el contexto indica cómo comprobar que el problema quedó resuelto, sumalo como último paso
+     ("Verificar: ..."). Si no lo indica, no lo inventes.
+   - Sin introducción ("La solución es...") ni cierre: solo los pasos.
 4. No inventes nombres de incidentes, códigos de error ni soluciones que no estén en el contexto.
 5. confianza: "alta" si el contexto responde directamente la pregunta; "media" si hay que inferir
    una parte; "baja" si el respaldo es débil o indirecto.
@@ -171,6 +183,59 @@ def _analizar(pregunta: str, contexto: str) -> tuple[AnalisisRCA, float]:
     return analisis, time.time() - inicio
 
 
+# ---------------------------------------------------------------------------
+# Fase C: confianza = la más conservadora entre el modelo y la evidencia recuperada
+# ---------------------------------------------------------------------------
+# La confianza que declara el modelo es un juicio; la similitud de los fragmentos es una
+# medida del buscador. Se combinan para que no aparezca "alta" con evidencia floja.
+#
+# Umbrales PROVISORIOS sobre la similitud (cosine, 0 a 1) del mejor fragmento usado.
+# Calibralos con tus consultas reales mirando el log "🎯 Confianza: ..." que imprime
+# responder_estructurado: si una respuesta correcta baja de nivel, bajá el umbral.
+UMBRAL_SIMILITUD_ALTA = 0.40    # por debajo de esto, la confianza queda como máximo en "media"
+UMBRAL_SIMILITUD_MEDIA = 0.25   # por debajo de esto, queda en "baja"
+_ORDEN_CONFIANZA = {"baja": 0, "media": 1, "alta": 2}
+
+
+def _ajustar_confianza(analisis: AnalisisRCA, evidencias: list[dict]) -> dict:
+    """
+    Limita la confianza del modelo según la similitud del mejor fragmento que usó
+    (o del mejor recuperado, si el modelo no indicó cuáles usó). Solo puede BAJARLA,
+    nunca subirla. Devuelve info para mostrar en la UI.
+    """
+    info = {"confianza_modelo": analisis.confianza, "similitud_base": None, "ajustada": False}
+    if not analisis.encontrado or not evidencias:
+        return info
+
+    puntajes = [ev["puntaje"] for ev in evidencias if "puntaje" in ev]
+    # Con métrica cosine el puntaje no pasa de 1. Si pasa, el índice usa otra métrica
+    # (por ejemplo distancia euclidiana) y estos umbrales no tendrían sentido.
+    if not puntajes or any(p > 1.0001 for p in puntajes):
+        print("⚠️  Puntajes fuera de [0, 1]: el índice no parece usar cosine; no se ajusta la confianza.")
+        return info
+
+    usados = [ev["puntaje"] for ev in evidencias if ev.get("usada") and "puntaje" in ev]
+    base = max(usados) if usados else max(puntajes)
+
+    if base >= UMBRAL_SIMILITUD_ALTA:
+        tope = "alta"
+    elif base >= UMBRAL_SIMILITUD_MEDIA:
+        tope = "media"
+    else:
+        tope = "baja"
+
+    final = min(analisis.confianza, tope, key=_ORDEN_CONFIANZA.get)
+    info["similitud_base"] = base
+    if final != analisis.confianza:
+        analisis.confianza = final
+        info["ajustada"] = True
+    print(
+        f"🎯 Confianza: modelo={info['confianza_modelo']} · similitud base={base:.2f} "
+        f"· tope={tope} · final={final}"
+    )
+    return info
+
+
 def responder_estructurado(pregunta: str) -> dict:
     """Flujo RAG con fuentes: busca, analiza y devuelve análisis + evidencias + tiempos."""
     inicio = time.time()
@@ -193,12 +258,15 @@ def responder_estructurado(pregunta: str) -> dict:
     for i, ev in enumerate(evidencias, start=1):
         ev["usada"] = i in usados
 
+    info_confianza = _ajustar_confianza(analisis, evidencias)
+
     print(f"⏱️  Búsqueda {t_busqueda:.2f}s + modelo {t_modelo:.2f}s")
     return {
         "analisis": analisis,
         "evidencias": evidencias,
         "t_busqueda": t_busqueda,
         "t_modelo": t_modelo,
+        **info_confianza,
     }
 
 
@@ -225,5 +293,5 @@ if __name__ == "__main__":
         resultado = responder_estructurado(pregunta)
         print(resultado["analisis"].model_dump_json(indent=2))
         for i, ev in enumerate(resultado["evidencias"], start=1):
-            print(f"\n[{i}] {ev['tipo']} · {ev['fuente']} p.{ev['pagina']} · relevancia {ev['relevancia']:.2f} · usada={ev['usada']}")
+            print(f"\n[{i}] {ev['tipo']} · {ev['fuente']} p.{ev['pagina']} · puntaje {ev['puntaje']:.3f} · usada={ev['usada']}")
             print(ev["texto"][:200].replace("\n", " ") + "…")
